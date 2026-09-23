@@ -3,7 +3,7 @@
 A Chrome extension (Manifest V3) that shows **elapsed time vs. a calibrated
 estimate** while Claude is working on claude.ai.
 
-> Status: v0.1 — works as a proof of concept. Selectors that read the claude.ai
+> Status: v0.2.x — in daily use by the author. Selectors that read the claude.ai
 > page are in `selectors.js` and will need retuning whenever Anthropic ships a
 > frontend change. Expect to fix them every few weeks.
 
@@ -88,8 +88,8 @@ Verified against the live claude.ai DOM on 2026-09-23:
 - **Estimate line:** parsed from the streaming message's text as soon as it
   appears.
 
-Everything is read from the DOM. No cookies, no internal API calls, nothing
-leaves the browser.
+Everything above is read from the DOM. The quota row (below) is the one
+exception.
 
 ### 3. Calibration
 
@@ -117,15 +117,43 @@ With fewer than 5 samples the panel shows `?` after the estimate.
 
 ### 4. The panel
 
-A small fixed panel in the lower-right corner of claude.ai:
+A small draggable panel, top-right of claude.ai by default:
 
 ```
- ▸ 2:14 / ~4:30     [████████░░░░░░░░]
-   Fable 5.1 · 搜尋+檔案 · 7 tools · n=23
+ –  2:14 / ~4:30    [████████░░░░░░░░]
+    Fable 5.1 Medium · 搜尋+檔案 · 7 tools · n=23 model+cat · v0.2.1 ↻
+    5h 45% · 59m      7d 21% · Fri 13:00
 ```
 
-- Turns amber past the corrected ETA, red past p90.
-- Click the sample count to export the history as JSON; a file picker imports.
+- Row 1: elapsed / corrected ETA and a bar. Amber past the corrected ETA, red
+  past p90. `?` after the ETA means fewer than 5 samples in the bucket.
+- Row 2: model, category, tool steps so far, sample count and which bucket
+  level the calibration fell back to, version, reload button.
+- Row 3: quota windows — used % and time to reset for the 5-hour and 7-day
+  windows. Amber ≥70 %, red ≥90 %. Refreshed every 5 minutes and after each
+  turn.
+- **Drag** anywhere on the panel to move it; the position is remembered.
+- **–** collapses it to a slim pill (timer + bar); **+** expands. Recording
+  continues while collapsed.
+- **Click the elapsed time** to show the last 15 records (time, model,
+  category, estimate→actual, ratio, tools). Aborted turns are struck through.
+- **Click `n=`** to export the history as JSON; **shift+click** imports;
+  **alt/option+click** clears.
+- **↻** reloads the extension and refreshes the tab, so updates to the folder
+  take effect without visiting `chrome://extensions`. History is kept.
+
+### 5. Quota row — where it comes from
+
+`usage.js` calls `GET https://claude.ai/api/organizations/<org>/usage` with
+the page's own session cookies (the org id is read from the `lastActiveOrg`
+cookie). This is the same undocumented endpoint the existing usage trackers
+use. It returns `five_hour` and `seven_day` objects with `utilization` (%) and
+`resets_at`. Caveats, stated plainly:
+
+- It is not a public API; Anthropic can change or remove it at any time.
+- It reports quota utilisation, not token counts. Exact tokens would need an
+  API key and are out of scope.
+- Nothing is sent anywhere else; the call is same-origin from the claude.ai tab.
 
 ---
 
@@ -154,7 +182,8 @@ Nothing does this for claude.ai. Closest:
 1. Clone or download this repo.
 2. Chrome → `chrome://extensions` → enable **Developer mode**.
 3. **Load unpacked** → select this folder.
-4. Open claude.ai. The panel appears when a reply starts streaming.
+4. Open claude.ai. The panel appears top-right; it lights up when a reply
+   starts streaming.
 5. Tell Claude (once, as a saved preference) to start every non-trivial reply
    with the estimate line described above.
 
@@ -165,6 +194,13 @@ so there is no way to inject the content script there. Use claude.ai in Chrome
 (or any Chromium browser that loads unpacked extensions: Edge, Brave, Arc) when
 you want the panel. The calibration history lives in that browser's
 `chrome.storage.local`, so it does not follow you to the app either.
+
+## Updating
+
+Overwrite the files in the folder Chrome loaded, then press **↻** on the panel
+(or "Reload" on the card in `chrome://extensions`). Do **not** remove and
+re-add the extension: that gives it a new id and a fresh, empty
+`chrome.storage.local`, which is how history gets lost.
 
 ## Known limits
 
@@ -181,6 +217,9 @@ you want the panel. The calibration history lives in that browser's
   turn is recorded as `aborted`.
 - Model detection depends on the model-picker text; if it cannot be read the
   turn is bucketed under `unknown`.
+- If Claude forgets the estimate line, or writes `⏱` somewhere else in the
+  reply first, the turn is recorded as `no ⏱` and does not feed calibration.
+  The fix is on the prompt side, not here.
 
 ## License
 
