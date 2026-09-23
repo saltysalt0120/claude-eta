@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "Claude ETA",
+  "version": "0.2.1",
+  "description": "Elapsed time vs. a calibrated estimate while Claude works on claude.ai. Self-estimate + local calibration; nothing leaves the browser.",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://claude.ai/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://claude.ai/*"
+      ],
+      "js": [
+        "selectors.js",
+        "calibrate.js",
+        "usage.js",
+        "content.js"
+      ],
+      "css": [
+        "panel.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
+}

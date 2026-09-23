@@ -1,0 +1,111 @@
+#claude-eta-panel {
+  position: fixed;
+  right: 16px;
+  top: 64px;
+  cursor: grab;
+  user-select: none;
+  z-index: 2147483000;
+  min-width: 240px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(20, 20, 22, 0.86);
+  color: #e8e8e8;
+  font: 12px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  opacity: 0.35;
+  transition: opacity 0.2s;
+}
+#claude-eta-panel:hover { opacity: 1; }
+#claude-eta-panel.ce-active,
+#claude-eta-panel.ce-done:hover {
+  opacity: 1;
+  pointer-events: auto;
+}
+#claude-eta-panel.ce-done,
+#claude-eta-panel.ce-drag {
+  pointer-events: auto;
+  opacity: 1;
+}
+#claude-eta-panel .ce-row1 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+#claude-eta-panel .ce-elapsed { font-weight: 600; }
+#claude-eta-panel .ce-sep { opacity: 0.5; }
+#claude-eta-panel .ce-target { opacity: 0.85; }
+#claude-eta-panel .ce-bar {
+  flex: 1;
+  height: 6px;
+  margin-left: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.15);
+  overflow: hidden;
+}
+#claude-eta-panel .ce-fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: #7cc4ff;
+  transition: width 0.4s linear;
+}
+#claude-eta-panel.ce-amber .ce-fill { background: #ffb84d; }
+#claude-eta-panel.ce-red .ce-fill { background: #ff6b6b; }
+#claude-eta-panel .ce-row2 {
+  display: flex;
+  gap: 8px;
+  margin-top: 3px;
+  opacity: 0.7;
+  font-size: 11px;
+}
+#claude-eta-panel .ce-n {
+  margin-left: auto;
+  cursor: pointer;
+  text-decoration: underline dotted;
+}
+#claude-eta-panel .ce-ver { opacity: 0.5; }
+#claude-eta-panel .ce-reload {
+  all: unset;
+  cursor: pointer;
+  padding: 0 4px;
+  border-radius: 4px;
+  opacity: 0.7;
+}
+#claude-eta-panel .ce-reload:hover { opacity: 1; background: rgba(255,255,255,0.12); }
+#claude-eta-panel .ce-hist {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255,255,255,0.15);
+  max-height: 260px;
+  overflow: auto;
+  font-size: 11px;
+}
+#claude-eta-panel .ce-hist table { border-collapse: collapse; }
+#claude-eta-panel .ce-hist td { padding: 1px 6px 1px 0; white-space: nowrap; }
+#claude-eta-panel .ce-hist tr.ce-ab { opacity: 0.45; text-decoration: line-through; }
+#claude-eta-panel .ce-min {
+  all: unset;
+  cursor: pointer;
+  width: 14px;
+  text-align: center;
+  opacity: 0.6;
+  margin-right: 2px;
+}
+#claude-eta-panel .ce-min:hover { opacity: 1; }
+#claude-eta-panel .ce-row3 {
+  display: flex;
+  gap: 10px;
+  margin-top: 3px;
+  font-size: 11px;
+  opacity: 0.75;
+}
+#claude-eta-panel .ce-warn { color: #ffb84d; }
+#claude-eta-panel .ce-hot { color: #ff6b6b; }
+/* collapsed: a slim pill with just the timer + bar */
+#claude-eta-panel.ce-collapsed { min-width: 0; padding: 4px 8px; }
+#claude-eta-panel.ce-collapsed .ce-row2,
+#claude-eta-panel.ce-collapsed .ce-row3,
+#claude-eta-panel.ce-collapsed .ce-hist,
+#claude-eta-panel.ce-collapsed .ce-sep,
+#claude-eta-panel.ce-collapsed .ce-target { display: none; }
+#claude-eta-panel.ce-collapsed .ce-bar { width: 60px; flex: none; }
