@@ -109,3 +109,22 @@
 #claude-eta-panel.ce-collapsed .ce-sep,
 #claude-eta-panel.ce-collapsed .ce-target { display: none; }
 #claude-eta-panel.ce-collapsed .ce-bar { width: 60px; flex: none; }
+#claude-eta-panel .ce-gear {
+  all: unset;
+  cursor: pointer;
+  padding: 0 4px;
+  opacity: 0.7;
+}
+#claude-eta-panel .ce-gear:hover { opacity: 1; }
+#claude-eta-panel .ce-settings {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255,255,255,0.15);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 10px;
+  font-size: 11px;
+}
+#claude-eta-panel .ce-settings label { cursor: pointer; display: flex; gap: 4px; align-items: center; }
+#claude-eta-panel .ce-settings input { margin: 0; }
+#claude-eta-panel.ce-collapsed .ce-settings { display: none; }

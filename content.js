@@ -38,7 +38,16 @@
       <span class="ce-tools"></span>
       <span class="ce-n" title="click: export · shift+click: import · alt+click: clear">n=0</span>
       <span class="ce-ver"></span>
+      <button class="ce-gear" title="Choose what to show">⚙</button>
       <button class="ce-reload" title="Reload extension + refresh this tab">↻</button>
+    </div>
+    <div class="ce-settings" hidden>
+      <label><input type="checkbox" data-k="eta"> ETA bar</label>
+      <label><input type="checkbox" data-k="model"> Model</label>
+      <label><input type="checkbox" data-k="cat"> Category</label>
+      <label><input type="checkbox" data-k="tools"> Tool count</label>
+      <label><input type="checkbox" data-k="u5"> 5-hour quota</label>
+      <label><input type="checkbox" data-k="u7"> 7-day quota</label>
     </div>
     <div class="ce-row3">
       <span class="ce-u5" title="5-hour window: used % · resets in">5h –</span>
@@ -60,7 +69,34 @@
     min: panel.querySelector('.ce-min'),
     u5: panel.querySelector('.ce-u5'),
     u7: panel.querySelector('.ce-u7'),
+    gear: panel.querySelector('.ce-gear'),
+    settings: panel.querySelector('.ce-settings'),
   };
+
+  // ---------- display settings (what to show; recording is unaffected) ----------
+  const SHOW_KEY = 'claudeEtaShow';
+  const SHOW_DEFAULT = { eta: true, model: true, cat: true, tools: true, u5: true, u7: true };
+  let show = { ...SHOW_DEFAULT };
+  function applyShow() {
+    const on = (el, v) => { el.style.display = v ? '' : 'none'; };
+    on(ui.sep, show.eta); on(ui.target, show.eta); on(panel.querySelector('.ce-bar'), show.eta);
+    on(ui.model, show.model); on(ui.cat, show.cat); on(ui.tools, show.tools);
+    on(ui.u5, show.u5); on(ui.u7, show.u7);
+    panel.querySelector('.ce-row3').style.display = (show.u5 || show.u7) ? '' : 'none';
+    ui.settings.querySelectorAll('input[data-k]').forEach((i) => { i.checked = !!show[i.dataset.k]; });
+  }
+  chrome.storage.local.get(SHOW_KEY).then((o) => {
+    if (o && o[SHOW_KEY]) show = { ...SHOW_DEFAULT, ...o[SHOW_KEY] };
+    applyShow();
+  }).catch(() => applyShow());
+  ui.gear.addEventListener('click', () => { ui.settings.hidden = !ui.settings.hidden; });
+  ui.settings.addEventListener('change', (e) => {
+    const k = e.target && e.target.dataset && e.target.dataset.k;
+    if (!k) return;
+    show[k] = e.target.checked;
+    applyShow();
+    try { chrome.storage.local.set({ [SHOW_KEY]: show }); } catch (_) {}
+  });
 
   // ---------- collapse (background mode) ----------
   const MIN_KEY = 'claudeEtaCollapsed';
@@ -153,7 +189,7 @@
   } catch (_) {}
   let drag = null;
   panel.addEventListener('pointerdown', (e) => {
-    if (e.target.closest('button, .ce-n')) return;
+    if (e.target.closest('button, .ce-n, .ce-settings, input, label')) return;
     const r = panel.getBoundingClientRect();
     drag = { dx: e.clientX - r.left, dy: e.clientY - r.top };
     panel.classList.add('ce-drag');
